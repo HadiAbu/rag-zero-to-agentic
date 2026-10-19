@@ -58,7 +58,7 @@ The checkpoint column maps to the 7 checkpoints of the RAG Build Day lab.
 ## Quick start
 
 ```bash
-git clone <your-fork-url> rag-zero-to-agentic && cd rag-zero-to-agentic
+git clone https://github.com/mkabajah/rag-zero-to-agentic.git && cd rag-zero-to-agentic
 python -m venv .venv && source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
 # CPU-only PyTorch first keeps the install small (skip this line if you have a GPU setup)
