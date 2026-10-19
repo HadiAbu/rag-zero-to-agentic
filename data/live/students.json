@@ -1,0 +1,5 @@
+{
+  "s-1001": {"name": "Lina", "team": "A17-team-2", "attendance_percent": 92, "capstone_submitted": false, "extension_days": 0},
+  "s-1002": {"name": "Omar", "team": "A17-team-2", "attendance_percent": 74, "capstone_submitted": false, "extension_days": 3},
+  "s-1003": {"name": "Maya", "team": "A17-team-5", "attendance_percent": 88, "capstone_submitted": true, "extension_days": 0}
+}

@@ -1,0 +1,9 @@
+{
+  "description": "The Build Day question sequence. Ask these in order, in one chat.",
+  "turns": [
+    {"question": "Explain hybrid search and reranking.", "expected_docs": ["search-notes"], "contains": "Hybrid search runs"},
+    {"question": "What are the advantages of the above?", "expected_docs": ["search-notes"], "contains": "main advantage"},
+    {"question": "Which one would find an exact policy ID?", "expected_docs": ["search-notes"], "contains": "exact terms"},
+    {"question": "Can you compare them using the course documents?", "expected_docs": ["search-notes"], "contains": ""}
+  ]
+}

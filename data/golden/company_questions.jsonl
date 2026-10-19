@@ -1,0 +1,13 @@
+{"id": "k1", "type": "stale", "role": "employee", "question": "How many days of annual leave do I get?", "expected_docs": ["leave-policy-2026"], "contains": "25 days"}
+{"id": "k2", "type": "stale", "role": "employee", "question": "How many unused vacation days can I carry over?", "expected_docs": ["leave-policy-2026"], "contains": "5 unused"}
+{"id": "k3", "type": "exact", "role": "engineer", "question": "What should I do about ERR-5003?", "expected_docs": ["payments-runbook"], "contains": "ERR-5003"}
+{"id": "k4", "type": "exact", "role": "engineer", "question": "Customer sees ERR-4012, should we retry?", "expected_docs": ["payments-runbook"], "contains": "ERR-4012"}
+{"id": "k5", "type": "paraphrase", "role": "employee", "question": "Can I fly in a nicer seat on a long trip?", "expected_docs": ["travel-expenses"], "contains": "Business class"}
+{"id": "k6", "type": "table", "role": "sales", "question": "How much does the Team plan cost per month?", "expected_docs": ["pricing-2026"], "contains": "99 euros"}
+{"id": "k7", "type": "acl", "role": "employee", "question": "What is the codename of the incident war room?", "expected_docs": [], "contains": ""}
+{"id": "k8", "type": "acl", "role": "security", "question": "What is the codename of the incident war room?", "expected_docs": ["incident-response"], "contains": "BLUEJAY"}
+{"id": "k9", "type": "direct", "role": "employee", "question": "What is the help desk phone extension?", "expected_docs": ["it-handbook"], "contains": "4400"}
+{"id": "k10", "type": "unanswerable", "role": "employee", "question": "What is the CEO's salary?", "expected_docs": [], "contains": ""}
+{"id": "k11", "type": "exact", "role": "engineer", "question": "Can we retry ERR-5007?", "expected_docs": ["error-catalog"], "contains": "payout"}
+{"id": "k12", "type": "exact", "role": "engineer", "question": "Should we retry ERR-5004?", "expected_docs": ["error-catalog"], "contains": "refund may already"}
+{"id": "k13", "type": "paraphrase", "role": "security", "question": "Who can talk to journalists after a breach?", "expected_docs": ["incident-response"], "contains": "communications lead"}

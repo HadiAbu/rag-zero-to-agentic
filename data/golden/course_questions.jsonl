@@ -1,0 +1,11 @@
+{"id": "c1", "type": "direct", "question": "What is the capstone deadline?", "expected_docs": ["capstone-policy"], "contains": "14 December"}
+{"id": "c2", "type": "paraphrase", "question": "Can I hand in the final project after the due date?", "expected_docs": ["capstone-policy"], "contains": "Late work"}
+{"id": "c3", "type": "exact", "question": "What's the project ID for the team assignment?", "expected_docs": ["team-brief"], "contains": "A17"}
+{"id": "c4", "type": "exact", "question": "What does POL-204 say about late submissions?", "expected_docs": ["team-policy", "team-brief"], "contains": "late"}
+{"id": "c5", "type": "multi", "question": "If I submit the capstone late, does that affect my team?", "expected_docs": ["team-policy"], "contains": "whole team"}
+{"id": "c6", "type": "paraphrase", "question": "How do I ask for more time on the final project?", "expected_docs": ["capstone-policy"], "contains": "EXT-7"}
+{"id": "c7", "type": "direct", "question": "Explain hybrid search and reranking.", "expected_docs": ["search-notes"], "contains": "Hybrid search runs"}
+{"id": "c8", "type": "direct", "question": "What are the advantages of hybrid search and reranking?", "expected_docs": ["search-notes"], "contains": "main advantage"}
+{"id": "c9", "type": "paraphrase", "question": "When can I meet the teacher in person?", "expected_docs": ["course-faq"], "contains": "office hours"}
+{"id": "c10", "type": "unanswerable", "question": "Who is the hiring manager?", "expected_docs": [], "contains": ""}
+{"id": "c11", "type": "paraphrase", "question": "Why would I combine keyword and vector search?", "expected_docs": ["search-notes"], "contains": "main advantage"}

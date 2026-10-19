@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+logs/
+.chroma/
+.rag_index/
+data/live/tickets_created.json
+.pytest_cache/
+.DS_Store
