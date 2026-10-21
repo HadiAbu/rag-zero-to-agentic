@@ -1,0 +1,6 @@
+{"type": "exact", "question": "Can we retry ERR-5007?", "docs": ["error-catalog"], "contains": "payout"}
+{"type": "paraphrase", "question": "Can I fly in a nicer seat on a long trip?", "docs": ["travel-expenses"], "contains": "Business class"}
+{"type": "version", "question": "How many days of annual leave do I get?", "docs": ["leave-policy-2026"], "contains": "25 days", "stale": "leave-policy-2024"}
+{"type": "restricted", "question": "What is the codename of the incident war room?"}
+{"type": "not in docs", "question": "What is the CEO's salary?"}
+{"type": "spread-out", "question": "Which error codes must never be retried automatically?", "all": ["ERR-4012", "ERR-5004", "ERR-5007", "ERR-5100"]}

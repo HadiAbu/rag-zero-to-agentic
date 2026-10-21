@@ -80,6 +80,10 @@ RAG_EMBEDDER=tfidf RAG_RERANKER=overlap RAG_LLM=extractive python lessons/05_key
 
 The offline stand-ins can't understand synonyms or write text, so some lessons lose their point; use it to explore the code.
 
+## The 3-hour lab
+
+[`lab/`](lab/) turns the lessons into one hands-on session: a single file, [`lab/rag_lab.py`](lab/rag_lab.py), where students switch on one step at a time (uncomment a block, run, compare the scoreboard), from naive RAG to Graph RAG. Step 11 serves their own pipeline as an MCP server for Claude Code, Claude Desktop or Kiro, and [`lab/challenge.py`](lab/challenge.py) scores teams at the end. The instructor run sheet is in [`lab/README.md`](lab/README.md).
+
 ## The RAG Lab chatbot
 
 `app.py` is a small [Gradio](https://www.gradio.app) chat app over the same documents. Chat on the left; on the right, for the last answer: the query that was actually searched, the ranked passages with scores, the exact prompt sent to the model, and the time each step took. Pick a checkpoint preset (1 to 7) or flip each switch yourself (rewriting, retriever, reranking, compression, relevance gate, role, current versions only) and ask the same question again.

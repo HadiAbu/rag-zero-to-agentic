@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "rag-lab": {
+      "type": "stdio",
+      "command": ".venv/bin/python",
+      "args": ["lab/mcp_server.py"],
+      "env": { "RAG_ROLE": "employee", "RAG_CORPUS": "company" }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "rag-lab": {
+      "command": ".venv/bin/python",
+      "args": ["lab/mcp_server.py"],
+      "env": { "RAG_ROLE": "employee", "RAG_CORPUS": "company" },
+      "disabled": false,
+      "autoApprove": ["search_docs", "get_document", "graph_neighbors"]
+    }
+  }
+}

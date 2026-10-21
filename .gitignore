@@ -9,3 +9,6 @@ logs/
 data/live/tickets_created.json
 .pytest_cache/
 .DS_Store
+
+# the challenge's hidden questions stay with the instructor
+lab/challenge/hidden*.jsonl
