@@ -80,6 +80,15 @@ RAG_EMBEDDER=tfidf RAG_RERANKER=overlap RAG_LLM=extractive python lessons/05_key
 
 The offline stand-ins can't understand synonyms or write text, so some lessons lose their point; use it to explore the code.
 
+## The RAG Lab chatbot
+
+`app.py` is a small [Gradio](https://www.gradio.app) chat app over the same documents. Chat on the left; on the right, for the last answer: the query that was actually searched, the ranked passages with scores, the exact prompt sent to the model, and the time each step took. Pick a checkpoint preset (1 to 7) or flip each switch yourself (rewriting, retriever, reranking, compression, relevance gate, role, current versions only) and ask the same question again.
+
+```bash
+pip install gradio
+python app.py        # open http://127.0.0.1:7860
+```
+
 ## Models (all free)
 
 | Part | Default | Change with |

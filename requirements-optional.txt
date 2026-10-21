@@ -1,2 +1,3 @@
 chromadb>=0.5        # lesson 14: a real vector database
 pytest>=8.0          # tests
+gradio>=5.0          # app.py: the RAG Lab chatbot
