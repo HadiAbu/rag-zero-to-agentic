@@ -30,8 +30,9 @@ whether a change is better. Claude Code reads the same rules from `CLAUDE.md`.
 - Keep the role check in retrieval: the role comes from `ROLE` / `RAG_ROLE`, never from the question.
 
 ## The CV data
-All candidates are invented, but treat them like real people: private HR notes stay private,
-and never rank or filter on age, gender, religion, origin or family status.
+The CVs in `challenge/cvs/` are **real people's CVs**. Never copy them into git, a public place or a
+web service; keep contact details out of answers unless asked; and never rank or filter candidates
+on age, gender, religion, origin or family status. (The CVs in `data/cvs/` are invented practice data.)
 
 ## Useful commands
 ```bash
