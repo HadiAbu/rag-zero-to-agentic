@@ -1,7 +1,7 @@
 """
-CV CHATBOT · the starter (naive RAG)          python chatbot/app.py   →  http://127.0.0.1:7862
+CV CHATBOT · the starter (naive RAG)          python challenge/app.py   →  http://127.0.0.1:7862
 
-Put the CVs in chatbot/cvs/ (PDF, DOCX, TXT or MD). That folder is ignored by git: real CVs
+Put the CVs in challenge/cvs/ (PDF, DOCX, TXT or MD). That folder is ignored by git: real CVs
 never go to GitHub.
 
 This file is deliberately simple. It is NAIVE RAG: fixed-size chunks, vector search, top-K,
@@ -10,10 +10,10 @@ and to PROVE every step is better in the Verify tab.
 
   Tab "Chat"    ask questions; the right side shows what was searched, what came back,
                 the exact prompt sent to the LLM, and the answer with its timing.
-  Tab "Verify"  upload a questions JSON (format: chatbot/questions_example.json), run them all,
+  Tab "Verify"  upload a questions JSON (format: challenge/questions_example.json), run them all,
                 and get Hit@K, Recall@K, MRR, refusals and a row per question you can open.
 
-Every place you can improve is marked  # STEP n · ...  (see chatbot/README.md for the menu).
+Every place you can improve is marked  # STEP n · ...  (see challenge/README.md for the menu).
 """
 import json
 import os

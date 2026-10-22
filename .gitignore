@@ -12,5 +12,5 @@ data/live/tickets_created.json
 
 # the challenge's hidden questions stay with the instructor
 lab/challenge/hidden*.jsonl
-chatbot/cvs/
-chatbot/verify_results.json
+challenge/cvs/
+challenge/verify_results.json

@@ -84,6 +84,15 @@ The offline stand-ins can't understand synonyms or write text, so some lessons l
 
 [`lab/`](lab/) turns the lessons into one hands-on session: a single file, [`lab/rag_lab.py`](lab/rag_lab.py), where students switch on one step at a time (uncomment a block, run, compare the scoreboard), from naive RAG to Graph RAG. Step 11 serves their own pipeline as an MCP server for Claude Code, Claude Desktop or Kiro, and [`lab/challenge.py`](lab/challenge.py) scores teams at the end. The instructor run sheet is in [`lab/README.md`](lab/README.md).
 
+## The challenge: build a CV chatbot
+
+[`challenge/`](challenge/) is the Build Day hands-on: a Gradio chatbot over candidate CVs that starts as naive RAG ([`challenge/app.py`](challenge/app.py)). Teams improve it step by step with Claude Code or Kiro, and prove every step in its **Verify** tab: upload a questions JSON, get Hit@K, Recall@K, MRR and refusals, and open any question to see its retrieval, the prompt sent and the output. Put the CVs in `challenge/cvs/` (ignored by git). The menu of steps and the prompts are in [`challenge/README.md`](challenge/README.md).
+
+```bash
+pip install pypdf python-docx gradio
+python challenge/app.py          # → http://127.0.0.1:7862
+```
+
 ## The RAG Lab chatbot
 
 `app.py` is a small [Gradio](https://www.gradio.app) chat app over the same documents. Chat on the left; on the right, for the last answer: the query that was actually searched, the ranked passages with scores, the exact prompt sent to the model, and the time each step took. Pick a checkpoint preset (1 to 7) or flip each switch yourself (rewriting, retriever, reranking, compression, relevance gate, role, current versions only) and ask the same question again.
