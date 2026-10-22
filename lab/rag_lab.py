@@ -276,26 +276,30 @@ QUESTIONS = {
 
 
 # ---------------------------------------------------------------- engine (no need to edit below)
-_LLM, _RERANKER = None, None
+_LLM, _RERANKER, _LOAD_MS = None, None, 0.0
 
 
 def llm():
-    global _LLM
-    if _LLM is None:
+    global _LLM, _LOAD_MS
+    if _LLM is None:                       # loaded on first use; loading time is not question time
+        t = time.perf_counter()
         _LLM = get_llm()
+        _LOAD_MS += (time.perf_counter() - t) * 1000
     return _LLM
 
 
 def reranker():
-    global _RERANKER
+    global _RERANKER, _LOAD_MS
     if _RERANKER is None:
+        t = time.perf_counter()
         _RERANKER = Reranker()
+        _LOAD_MS += (time.perf_counter() - t) * 1000
     return _RERANKER
 
 
 def ask(question, history):
     """One full RAG turn with whatever steps are switched on. Returns a dict for printing or tools."""
-    t0 = time.perf_counter()
+    t0, load0 = time.perf_counter(), _LOAD_MS
     query = make_query(question, history)
     hits = postprocess(query, retrieve(query, POOL))
     refused = should_refuse(query, hits)
@@ -304,7 +308,7 @@ def ask(question, history):
     if GENERATE_ANSWERS and not refused:
         answer = llm().chat(ANSWER_SYSTEM, build_prompt(query, texts), 250)
     return {"query": query, "hits": [] if refused else hits, "texts": texts, "refused": refused,
-            "answer": answer, "tokens": count_tokens(" ".join(texts)), "ms": (time.perf_counter() - t0) * 1000}
+            "answer": answer, "tokens": count_tokens(" ".join(texts)), "ms": (time.perf_counter() - t0) * 1000 - (_LOAD_MS - load0)}
 
 
 def judge(result, expect):
