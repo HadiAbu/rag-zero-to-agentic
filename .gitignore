@@ -14,3 +14,4 @@ data/live/tickets_created.json
 lab/challenge/hidden*.jsonl
 challenge/cvs/
 challenge/verify_results.json
+challenge/chroma_db/
