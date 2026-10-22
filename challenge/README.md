@@ -16,6 +16,7 @@ python challenge/app.py                      # → http://127.0.0.1:7862
 | Tab | Shows |
 |-----|-------|
 | 💬 Chat | The answer, and on the right: what was **searched**, the **retrieved** chunks with their scores, the exact **prompt sent**, and the **output** with timings |
+| 🕸 Graph | The knowledge graph your STEP 7 builds: pick a skill, city or candidate and see its connections. Empty until you build it |
 | ✅ Verify | Upload a questions JSON, run them all: Hit@K, Recall@K, MRR, refusals, time, prompt size, and one row per question you can open to see its retrieval, prompt and output. The results are saved to `challenge/verify_results.json` |
 
 Answers take 20–60 s each on a laptop CPU. Untick **Generate the answer** to test retrieval instantly.
@@ -53,7 +54,7 @@ Do them in any order, **one at a time**, and run Verify after each. Every step i
 | 4 · Rerank | The right CV is found, but not first | "Get 20 candidates, rerank them with the cross-encoder in ragkit.Reranker (its .model.predict takes (question, text) pairs) and keep the top K. Print the time it adds." | MRR, time |
 | 5 · Metadata and filters | "In Haifa", "5+ years" are guessed by similarity | "At load time, extract each CV's name, city and years of experience into metadata. In retrieve, read a city or a minimum of years from the question and filter before searching." | `list` rows |
 | 6 · Refusal | It always answers, even when no CV fits | "Make should_refuse return True when the best retrieved chunk is not relevant enough. Print the top score for every Verify question first, then pick a threshold and explain it." | Refusals correct |
-| 7 · Lists (Graph RAG) | "Which candidates know X?" has more answers than K | "For 'which / who … candidates' questions, return ALL matching CVs, not top-K: build a small graph (candidate → skill, candidate → city, candidate → company) at load time and answer from it." | Recall@K on `list` rows |
+| 7 · Graph RAG | "Which candidates know X?" has more answers than K | "Fill in build_graph in challenge/app.py: for every CV add edges candidate → has_skill → skill and candidate → lives_in → city, as (type, name) nodes, and give each candidate node source=<file name>. Then make retrieve answer 'which / who … candidates' questions from the graph: one chunk for EVERY connected CV, with via = 'graph: <entity> → <name>'." Then open the **🕸 Graph** tab | Recall@K on `list` rows, the "found by" column |
 | 8 · MCP + agent | Use it from Claude or Kiro | "Write challenge/mcp_server.py with FastMCP exposing search_cvs(question) and get_cv(name), using the functions in challenge/app.py. Then add it to .mcp.json as cv-chatbot." | Ask your agent for a shortlist |
 
 ## Rules

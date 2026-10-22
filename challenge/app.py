@@ -23,7 +23,12 @@ import sys
 import time
 
 import gradio as gr
+import matplotlib
+import networkx as nx
 import numpy as np
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -71,12 +76,28 @@ def chunk(doc):
 
 # ================================================================= 3 · EMBED AND INDEX
 def build_index():
-    global CHUNKS, VECTORS
+    global CHUNKS, VECTORS, GRAPH
     docs = load_cvs()
     CHUNKS = [c for d in docs for c in chunk(d)]
     VECTORS = EMBEDDER.encode([c["text"] for c in CHUNKS])
     VECTORS = VECTORS / np.linalg.norm(VECTORS, axis=1, keepdims=True)
-    return f"Loaded {len(docs)} CVs from {CV_DIR} → {len(CHUNKS)} chunks"
+    GRAPH = build_graph(CHUNKS)
+    graph = f" · graph: {GRAPH.number_of_nodes()} nodes, {GRAPH.number_of_edges()} edges" if GRAPH.number_of_nodes() else " · no graph yet (STEP 7)"
+    return f"Loaded {len(docs)} CVs from {CV_DIR} → {len(CHUNKS)} chunks" + graph
+
+
+# ================================================================= 3b · THE KNOWLEDGE GRAPH
+# STEP 7 · Graph RAG: "Which candidates know Kubernetes?" has more answers than K can hold.
+#   1. build_graph: for every CV add edges  candidate —has_skill→ skill, —lives_in→ city,
+#      —worked_at→ company (rules, or one LLM call per chunk). Nodes are (type, name) pairs:
+#      ("candidate", "Lina Haddad"), ("skill", "kubernetes"), ("city", "haifa"), ("company", "orbit health").
+#      Give every candidate node  source=<the CV file name>  so you can find its chunks.
+#   2. retrieve: when the question asks for a list ("which / who … candidates") and names a node in
+#      the graph, return one chunk for EVERY connected CV, each with  "via": "graph: kubernetes → Lina Haddad".
+#   The 🕸 Graph tab draws whatever is in GRAPH, and the tables show "found by" for every chunk.
+def build_graph(chunks):
+    g = nx.Graph()
+    return g
 
 
 # ================================================================= 4 · RETRIEVE
@@ -93,12 +114,11 @@ def retrieve(query):
     q = q / np.linalg.norm(q)
     scores = VECTORS @ q
     best = np.argsort(-scores)[:K]
-    return [{"rank": r, "score": float(scores[i]), **CHUNKS[i]} for r, i in enumerate(best, 1)]
+    return [{"rank": r, "score": float(scores[i]), "via": "vector", **CHUNKS[i]} for r, i in enumerate(best, 1)]
 
 
 # ================================================================= 5 · DECIDE AND PROMPT
 # STEP 6 · Refuse when nothing relevant came back (the best score is too low): no LLM call.
-# STEP 7 · "Which candidates know X?" has many answers: top-3 cannot hold them (Graph RAG / filters).
 def should_refuse(query, hits):
     return False
 
@@ -193,8 +213,8 @@ def show_detail(qid, traces):
     t, item, s = v["trace"], v["item"], v["score"]
     head = (f"**{qid} · {item['question']}**\n\nExpected: `{', '.join(item.get('expected', [])) or 'refuse'}` · "
             f"Result: **{s['note']}** · Searched for: `{t['query']}`")
-    table = [[h["rank"], h["source"], round(h["score"], 3), "✓ expected" if matches(h["source"], item.get("expected", [])) else "",
-              h["text"][:300]] for h in t["hits"]]
+    table = [[h["rank"], h["source"], round(h["score"], 3), h.get("via", "vector"),
+              "✓ expected" if matches(h["source"], item.get("expected", [])) else "", h["text"][:300]] for h in t["hits"]]
     return head, table, f"SYSTEM:\n{SYSTEM_PROMPT}\n\nUSER:\n{t['prompt']}", t["answer"]
 
 
@@ -216,14 +236,53 @@ def respond(question, chat, generate):
     query_md = (f"**You asked:** {question}\n\n**Searched for:** `{t['query']}`\n\n"
                 f"Search {t['search_ms']:.0f} ms · answer {t['answer_ms']:.0f} ms · prompt {t['prompt_tokens']} tokens"
                 + ("\n\n**Refused before calling the LLM.**" if t["refused"] else ""))
-    table = [[h["rank"], h["source"], round(h["score"], 3), h["text"][:300]] for h in t["hits"]]
+    table = [[h["rank"], h["source"], round(h["score"], 3), h.get("via", "vector"), h["text"][:300]] for h in t["hits"]]
     return "", chat, query_md, table, f"SYSTEM:\n{SYSTEM_PROMPT}\n\nUSER:\n{t['prompt']}", t["answer"]
+
+
+# ================================================================= GRAPH VIEW
+COLORS = {"candidate": "#f2a33a", "skill": "#1f9e89", "city": "#3b6fb6", "company": "#8a63d2"}
+
+
+def node_label(n):
+    return f"{n[0]}: {n[1]}" if isinstance(n, tuple) and len(n) == 2 else str(n)
+
+
+def graph_choices():
+    nodes = sorted(GRAPH.nodes, key=lambda n: -GRAPH.degree(n))
+    return [node_label(n) for n in nodes]
+
+
+def draw_graph(entity, hops):
+    if GRAPH.number_of_nodes() == 0:
+        return None, "**No graph yet.** Build it in STEP 7 (`build_graph` in challenge/app.py), then restart the app."
+    node = next((n for n in GRAPH if node_label(n) == entity), None) or max(GRAPH.nodes, key=GRAPH.degree)
+    sub = nx.ego_graph(GRAPH, node, radius=int(hops))
+    if sub.number_of_nodes() > 70:                         # keep it readable: the closest 70
+        keep = [node] + sorted((n for n in sub if n != node), key=lambda n: -GRAPH.degree(n))[:69]
+        sub = sub.subgraph(keep)
+    fig, ax = plt.subplots(figsize=(11, 7))
+    pos = nx.spring_layout(sub, seed=7, k=1.2 / max(len(sub), 1) ** 0.5)
+    kinds = [n[0] if isinstance(n, tuple) else "other" for n in sub]
+    nx.draw_networkx_edges(sub, pos, ax=ax, alpha=0.35, edge_color="#7a869a")
+    nx.draw_networkx_nodes(sub, pos, ax=ax, node_color=[COLORS.get(k, "#999999") for k in kinds],
+                           node_size=[900 if n == node else 380 for n in sub], alpha=0.95)
+    nx.draw_networkx_labels(sub, pos, ax=ax, labels={n: (n[1] if isinstance(n, tuple) else str(n)) for n in sub}, font_size=8)
+    for k, c in COLORS.items():
+        ax.scatter([], [], c=c, label=k)
+    ax.legend(loc="lower left", frameon=False)
+    ax.set_title(f"{node_label(node)} · {int(hops)} hop(s) · {sub.number_of_nodes()} nodes", fontsize=11)
+    ax.axis("off")
+    fig.tight_layout()
+    near = sorted(node_label(n) for n in GRAPH.neighbors(node))
+    md = f"**{node_label(node)}** is connected to {len(near)} nodes: " + ", ".join(near[:40]) + (" …" if len(near) > 40 else "")
+    return fig, md
 
 
 # ================================================================= UI
 print("Loading the models…")
 EMBEDDER, LLM = get_embedder(), get_llm()
-CHUNKS, VECTORS = [], None
+CHUNKS, VECTORS, GRAPH = [], None, nx.Graph()
 STATUS = build_index()
 print(STATUS)
 
@@ -239,8 +298,8 @@ with gr.Blocks(title="CV Chatbot") as demo:
             with gr.Column(scale=6):
                 query_out = gr.Markdown("Ask something to see how the answer is made.")
                 with gr.Tab("Retrieved"):
-                    hits_out = gr.Dataframe(headers=["#", "CV", "score", "chunk"], wrap=True, interactive=False,
-                                             column_widths=["6%", "24%", "10%", "60%"])
+                    hits_out = gr.Dataframe(headers=["#", "CV", "score", "found by", "chunk"], wrap=True, interactive=False,
+                                             column_widths=["5%", "20%", "8%", "17%", "50%"])
                 with gr.Tab("Prompt sent"):
                     prompt_out = gr.Code(language=None, label="Exactly what the LLM receives")
                 with gr.Tab("Output"):
@@ -260,13 +319,24 @@ with gr.Blocks(title="CV Chatbot") as demo:
         gr.Markdown("### Open one question")
         pick = gr.Dropdown(label="Question", choices=[])
         d_head = gr.Markdown()
-        d_hits = gr.Dataframe(headers=["#", "CV", "score", "expected?", "chunk"], wrap=True, interactive=False,
-                              column_widths=["5%", "20%", "8%", "12%", "55%"])
+        d_hits = gr.Dataframe(headers=["#", "CV", "score", "found by", "expected?", "chunk"], wrap=True, interactive=False,
+                              column_widths=["5%", "18%", "7%", "15%", "10%", "45%"])
         with gr.Row():
             d_prompt = gr.Code(language=None, label="Prompt sent")
             d_answer = gr.Textbox(label="Output", lines=8)
         run.click(run_verify, [qfile, vgen], [summary, results, pick, download, traces])
         pick.change(show_detail, [pick, traces], [d_head, d_hits, d_prompt, d_answer])
+
+    with gr.Tab("🕸 Graph"):
+        gr.Markdown("The knowledge graph your STEP 7 builds. Pick a skill, city, company or candidate and see what it is connected to.")
+        with gr.Row():
+            g_pick = gr.Dropdown(label="Entity", choices=graph_choices(), value=(graph_choices() or [None])[0])
+            g_hops = gr.Slider(1, 2, value=1, step=1, label="Hops")
+            g_draw = gr.Button("Draw")
+        g_plot = gr.Plot()
+        g_info = gr.Markdown()
+        g_draw.click(draw_graph, [g_pick, g_hops], [g_plot, g_info])
+        demo.load(draw_graph, [g_pick, g_hops], [g_plot, g_info])
 
 if __name__ == "__main__":
     demo.launch(server_port=7862)
