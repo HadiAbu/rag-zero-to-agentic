@@ -14,6 +14,7 @@ HOW THIS FILE WORKS
 
   Steps 1-7 use the course documents and the 4 Build Day questions (one chat).
   Step 8 switches to the company documents, which have versions and permissions.
+  The CHALLENGE (after step 11) switches to the candidate CVs: CORPUS = "cvs".
 
   Fast by default: only retrieval runs. Set GENERATE_ANSWERS = True to also
   get the LLM's answers (about 25 s per question on a laptop CPU).
@@ -25,14 +26,14 @@ import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
-from ragkit import BM25Index, Reranker, VectorIndex, chunk_documents, get_embedder, get_llm, load_company, load_course
+from ragkit import BM25Index, Reranker, VectorIndex, chunk_documents, get_embedder, get_llm, load_folder
 from ragkit.context import compress, count_tokens
 from ragkit.llm import ANSWER_SYSTEM, build_prompt
 from ragkit.query import rewrite_query
 from ragkit.retrieval import Hit
 
 # ---------------------------------------------------------------- settings
-CORPUS = "course"          # "course" or "company" (STEP 8 switches it)
+CORPUS = "course"          # "course", "company" (STEP 8) or "cvs" (the CHALLENGE): a folder in data/
 ROLE = "employee"          # who is asking (used from STEP 8)
 K = 3                      # passages sent to the LLM
 POOL = 10                  # candidates fetched before postprocess
@@ -256,6 +257,23 @@ FILTER = None   # a function chunk -> bool that hides chunks (STEP 8)
 ## ======================================================================
 
 
+## ======================================================================
+## CHALLENGE · The Knowledge Agent (brief: lab/challenge/BRIEF.md)
+## Switch to the candidate CVs and make your pipeline smart enough for hiring questions.
+## Uncomment the first line, run, read the scoreboard, then write your own code below it.
+## ======================================================================
+# CORPUS = "cvs"
+#
+## Ideas that score (each one is a small function you replace, like the steps above):
+##  - FILTER: the private HR notes are restricted to ROLE "hr"; old CVs are "superseded".
+##  - a CV graph in extract(): (CAND-004, has_skill, Kubernetes), (CAND-004, located_in, Haifa)
+##    and a graph_search() that answers "Which candidates know X?" with ALL of them.
+##  - metadata from the question: "in Haifa", "at least 5 years" -> filter on chunk.meta
+##    ("location", "years") instead of hoping similarity finds it.
+##  - a better refusal than one cosine threshold: try the reranker's score.
+## Check yourself:  python lab/challenge.py        (7 practice questions, same scoring as the final)
+
+
 # ---------------------------------------------------------------- the test questions
 QUESTIONS = {
     "course": [   # one chat, asked in this order (the Build Day sequence)
@@ -271,6 +289,14 @@ QUESTIONS = {
         ("restricted", "What is the codename of the incident war room?", {"restricted": True}),
         ("not in docs", "What is the CEO's salary?", {"refuse": True}),
         ("spread-out", "Which error codes must never be retried automatically?", {"all": ["ERR-4012", "ERR-5004", "ERR-5007", "ERR-5100"]}),
+    ],
+    "cvs": [      # the CHALLENGE: hiring questions about the candidate CVs
+        ("exact", "What did CAND-014 build at Cedar Payments?", {"docs": ["cand-014"], "contains": "merchant onboarding"}),
+        ("paraphrase", "Who has built systems that suggest products to online shoppers?", {"docs": ["cand-011"], "contains": "recommendation"}),
+        ("version", "How many years of experience does Rania Khoury have?", {"docs": ["cand-017"], "contains": "", "stale": "cand-017-2024"}),
+        ("restricted", "What salary does Lina Haddad expect?", {"restricted": True}),
+        ("not in docs", "Which candidate has a pilot license?", {"refuse": True}),
+        ("spread-out", "Which candidates know Kubernetes?", {"all": ["CAND-003", "CAND-004", "CAND-009", "CAND-011"]}),
     ],
 }
 
@@ -337,7 +363,7 @@ def judge(result, expect):
 def setup():
     """Load the documents and build the indexes for the current CORPUS (and the graph from STEP 10)."""
     global VEC, BM25, CHUNKS, GRAPH, DOCS
-    DOCS = load_course() if CORPUS == "course" else load_company()
+    DOCS = load_folder(CORPUS)
     chunks = chunk_documents(DOCS)
     CHUNKS = {c.id: c for c in chunks}
     VEC = VectorIndex(get_embedder()).add(chunks)

@@ -40,3 +40,17 @@ def run_steps(up_to: int, tmp_path) -> str:
 @pytest.mark.parametrize("up_to", range(1, 11))
 def test_every_step_runs(up_to, tmp_path):
     assert "Scoreboard" in run_steps(up_to, tmp_path)
+
+
+def test_challenge_on_cvs(tmp_path):
+    """The CHALLENGE block switches to the CVs, and the scorer runs on the practice set."""
+    src = switch_on(LAB.read_text(), 10).replace('\n# CORPUS = "cvs"\n', '\nCORPUS = "cvs"\n')
+    (tmp_path / "rag_lab.py").write_text(src)
+    (tmp_path / "challenge.py").write_text((LAB.parent / "challenge.py").read_text())
+    env = dict(os.environ, RAG_EMBEDDER="tfidf", RAG_LLM="extractive", RAG_RERANKER="overlap", COLUMNS="140",
+               PYTHONPATH=str(LAB.parents[1]))
+    for script, args in (("rag_lab.py", []), ("challenge.py", [str(LAB.parent / "challenge" / "cvs_practice.jsonl")])):
+        out = subprocess.run([sys.executable, str(tmp_path / script), *args], capture_output=True, text=True,
+                             env=env, cwd=LAB.parents[1], timeout=600)
+        assert out.returncode == 0, out.stderr[-2000:]
+    assert "SCORE" in out.stdout

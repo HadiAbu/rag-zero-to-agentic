@@ -9,6 +9,9 @@ Connect it:                          see lab/README.md, "Connect the MCP server"
 
 Security: the user's role comes from the RAG_ROLE environment variable, set by whoever
 starts the server. It is NOT a tool argument, so the model cannot give itself more rights.
+
+RAG_CORPUS picks the documents: "company" (step 11) or "cvs" (the challenge, server "cv-desk").
+With "cvs" two more tools appear: list_jobs and find_candidates (the Knowledge Agent uses them).
 """
 import contextlib
 import os
@@ -34,8 +37,9 @@ mcp = FastMCP("rag-lab")
 
 @mcp.tool()
 def search_docs(question: str) -> dict:
-    """Search the company knowledge base. Returns the passages to answer from, each with its
-    source. If 'refused' is true, the documents do not contain the answer: say so."""
+    """Search the knowledge base (company documents, or candidate CVs and job posts).
+    Returns the passages to answer from, each with its source. Ask one focused question
+    per call. If 'refused' is true, the documents do not contain the answer: say so."""
     with contextlib.redirect_stdout(sys.stderr):
         result = lab.ask(question, [])
     return {
@@ -72,6 +76,47 @@ def graph_neighbors(entity: str) -> dict:
         elif lab.FILTER is None or lab.FILTER(lab.CHUNKS[n[1]]):
             out["mentioned_in"].append(lab.CHUNKS[n[1]].label)
     return out
+
+
+# ---------------------------------------------------------------- CV tools (RAG_CORPUS=cvs)
+def _profiles():
+    """One entry per candidate, from the header of their CURRENT CV."""
+    out = {}
+    for d in lab.DOCS:
+        cid = d.meta.get("candidate_id")
+        if cid and d.meta.get("status") == "current" and d.meta.get("access") != "restricted":
+            out[cid] = {"candidate_id": cid, "name": d.meta.get("name"), "headline": d.meta.get("headline"),
+                        "location": d.meta.get("location"), "years": int(d.meta.get("years", 0)),
+                        "languages": d.meta.get("languages"), "doc_id": d.doc_id, "_text": d.text.lower()}
+    return out
+
+
+if lab.CORPUS == "cvs":
+
+    @mcp.tool()
+    def list_jobs() -> list:
+        """The open positions, with their must-have and nice-to-have requirements."""
+        return [{"job_id": d.meta.get("job_id"), "doc_id": d.doc_id, "title": d.title, "text": d.text}
+                for d in lab.DOCS if d.meta.get("job_id")]
+
+    @mcp.tool()
+    def find_candidates(skill: str = "", location: str = "", min_years: int = 0) -> list:
+        """Filter ALL candidates on their current CV (not top-k): skill or keyword in the CV text,
+        city (e.g. 'Haifa'), minimum years of experience. Leave a field empty to skip it.
+        Returns short profiles; read a full CV with get_document(doc_id)."""
+        hits = []
+        for p in _profiles().values():
+            if skill and skill.lower() not in p["_text"]:
+                continue
+            if location and location.lower() not in (p["location"] or "").lower():
+                continue
+            if p["years"] < min_years:
+                continue
+            hits.append({k: v for k, v in p.items() if k != "_text"})
+        return hits
+
+    ## CHALLENGE (level 4): add a tool your agent needs, for example
+    ## match_job(job_id) -> every candidate with which must-haves they meet, with evidence.
 
 
 if __name__ == "__main__":

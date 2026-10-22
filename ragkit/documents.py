@@ -40,7 +40,7 @@ def parse_front_matter(raw: str) -> tuple[dict, str]:
         if ":" in line:
             key, value = line.split(":", 1)
             value = value.strip()
-            if "," in value and key.strip() == "allowed_roles":
+            if key.strip() == "allowed_roles":                 # always a list, even with one role
                 meta[key.strip()] = [v.strip() for v in value.split(",")]
             else:
                 meta[key.strip()] = value
@@ -73,3 +73,8 @@ def load_course() -> list[Document]:
 
 def load_company() -> list[Document]:
     return load_folder("company")
+
+
+def load_cvs() -> list[Document]:
+    """Candidate CVs, private HR notes and job posts (the Build Day challenge)."""
+    return load_folder("cvs")

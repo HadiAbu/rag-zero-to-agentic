@@ -1,11 +1,12 @@
 """
-THE CHALLENGE · "Knowledge Desk"
+THE CHALLENGE · "The Knowledge Agent" (brief: lab/challenge/BRIEF.md)
 
-Score YOUR pipeline (lab/rag_lab.py, with the steps and settings you chose) on a set
-of company questions, always asked by an employee.
+Score YOUR pipeline (lab/rag_lab.py, with the steps and settings you chose) on hiring
+questions about the candidate CVs, always asked by an interviewer (ROLE "employee").
 
-    python lab/challenge.py                                  # practice questions
+    python lab/challenge.py                                  # 7 practice questions on the CVs
     python lab/challenge.py path/to/hidden.jsonl --team "Team 3"
+    python lab/challenge.py --corpus company                 # the older company-documents set
 
 Points per question
     exact / paraphrase / version   +2 the right source reaches the prompt, +1 more if it is #1
@@ -13,6 +14,7 @@ Points per question
     restricted                     +3 nothing restricted reaches the prompt, -5 if it leaks
     not in docs                    +3 refused, -2 if passages were sent anyway
     spread-out                     +1 for every required item found
+    match (a list of candidates)   +1 for every right candidate in the prompt, -1 for every wrong one
 Ties: fewer passage tokens wins (a cheaper prompt is a better system).
 """
 import argparse
@@ -37,6 +39,10 @@ def score(item, result):
         return (-5, "LEAKED restricted text") if leaked else (3, "protected")
     if kind == "not in docs":
         return (3, "refused") if result["refused"] or not hits else (-2, "answered from unrelated text")
+    if kind == "match":
+        present = {h.chunk.meta.get("candidate_id") for h in hits} - {None}
+        right, wrong = present & set(item["all"]), present - set(item["all"])
+        return len(right) - len(wrong), f"{len(right)}/{len(item['all'])} right, {len(wrong)} wrong"
     if kind == "spread-out":
         text = " ".join(h.chunk.with_context() for h in hits)
         got = [x for x in item["all"] if x in text]
@@ -53,12 +59,14 @@ def score(item, result):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("questions", nargs="?", default=str(HERE / "challenge" / "practice.jsonl"))
+    ap.add_argument("questions", nargs="?", default=None)
     ap.add_argument("--team", default="my team")
+    ap.add_argument("--corpus", default="cvs", help="cvs (default) or company")
     args = ap.parse_args()
+    args.questions = args.questions or str(HERE / "challenge" / ("cvs_practice.jsonl" if args.corpus == "cvs" else "practice.jsonl"))
     items = [json.loads(line) for line in pathlib.Path(args.questions).read_text(encoding="utf-8").splitlines() if line.strip()]
 
-    lab.CORPUS, lab.ROLE, lab.GENERATE_ANSWERS = "company", "employee", False
+    lab.CORPUS, lab.ROLE, lab.GENERATE_ANSWERS = args.corpus, "employee", False
     with contextlib.redirect_stdout(io.StringIO()):
         lab.setup()
     from ragkit import show
@@ -70,7 +78,7 @@ def main():
         total += pts
         tokens += result["tokens"]
         rows.append({"type": item["type"], "question": item["question"], "result": note, "points": pts})
-    best = sum(len(i["all"]) if i["type"] == "spread-out" else 3 for i in items)
+    best = sum(len(i["all"]) if i["type"] in ("spread-out", "match") else 3 for i in items)
     show.table(rows, f"{args.team}")
     show.info(f"SCORE {total} / {best} · passage tokens {tokens} (tie-break: fewer wins)")
 

@@ -1,0 +1,7 @@
+{"type": "exact", "question": "What did CAND-007 build for call records?", "docs": ["cand-007"], "contains": "call records"}
+{"type": "paraphrase", "question": "Who made a website much faster to load?", "docs": ["cand-005"], "contains": "load time"}
+{"type": "version", "question": "What does Tamar Klein mainly program in?", "docs": ["cand-009"], "contains": "Go", "stale": "cand-009-2023"}
+{"type": "restricted", "question": "What is Karim Mansour's phone number?"}
+{"type": "not in docs", "question": "Which candidate has worked at Google?"}
+{"type": "spread-out", "question": "Which candidates have worked with Kafka?", "all": ["CAND-006", "CAND-007", "CAND-009"]}
+{"type": "match", "question": "Which candidates are based in Nazareth?", "all": ["CAND-001", "CAND-010", "CAND-019"]}
