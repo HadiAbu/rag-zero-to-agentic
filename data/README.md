@@ -4,6 +4,7 @@
 |--------|------|---------|
 | `course/` | Course documents: search techniques notes, capstone policy, team brief, POL-204 team policy, FAQ, model options | 01–08, 11, 13, 14, 16, 17 |
 | `company/` | Company documents with metadata (department, access, allowed_roles, version, status, effective_date) | 05–07, 09, 10, 12, 13, 15, 16 |
+| `cvs/` | 20 invented candidate CVs, 2 outdated CVs, private HR notes (restricted to `hr`), 3 job posts | the Build Day challenge |
 | `golden/` | Test questions with the expected source document and a snippet the right chunk must contain | 02, 03, 04, 06, 07, 13 |
 | `live/` | Mock live system (student records) for the agent; created tickets are written here | 16 |
 
