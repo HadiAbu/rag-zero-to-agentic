@@ -1,3 +1,5 @@
 chromadb>=0.5        # lesson 14: a real vector database
 pytest>=8.0          # tests
 gradio>=5.0          # app.py: the RAG Lab chatbot
+pypdf>=4.0            # chatbot: read PDF CVs
+python-docx>=1.1      # chatbot: read Word CVs

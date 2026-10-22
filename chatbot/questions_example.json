@@ -1,0 +1,14 @@
+{
+  "about": "Example questions for the Verify tab, on the practice CVs (data/cvs). Your instructor sends the real set. expected = file names (or part of them) that must be retrieved; refuse = the CVs do not contain the answer.",
+  "questions": [
+    {"id": "q01", "type": "exact", "question": "What did Fadi Khalil build at Cedar Payments?", "expected": ["Fadi_Khalil"], "answer_contains": ["onboarding"]},
+    {"id": "q02", "type": "exact", "question": "Which candidate built a RAG assistant over support articles?", "expected": ["Lina_Haddad"]},
+    {"id": "q03", "type": "paraphrase", "question": "Who has built systems that suggest products to online shoppers?", "expected": ["Daniel_Levi"]},
+    {"id": "q04", "type": "paraphrase", "question": "Who made a website much faster to load?", "expected": ["Eitan_Barak"]},
+    {"id": "q05", "type": "follow-up", "question": "And where did he study?", "history": ["Who made a website much faster to load?"], "expected": ["Eitan_Barak"]},
+    {"id": "q06", "type": "list", "question": "Which candidates know Kubernetes?", "expected": ["Karim_Mansour", "Lina_Haddad", "Tamar_Klein", "Daniel_Levi"]},
+    {"id": "q07", "type": "list", "question": "Which candidates are based in Nazareth?", "expected": ["Ahmad_Nasser", "Hadi_Zoabi", "Dina_Hassan"]},
+    {"id": "q08", "type": "not in CVs", "question": "Which candidate has a pilot license?", "refuse": true},
+    {"id": "q09", "type": "not in CVs", "question": "Who has worked at Google?", "refuse": true}
+  ]
+}
