@@ -37,10 +37,27 @@ top shows which level works: ⬜ waiting · ❌ error (with the message) · ✅ 
 | 4 · Rerank | The right CV is found, but not first | "Get 20 candidates, rerank them with ragkit.Reranker (its .model.predict takes (question, text) pairs) and keep the top K. Print the time it adds." | MRR, time |
 | 5 · Filters | "In Haifa", "5+ years" are guessed by similarity | "At ingestion, extract each CV's name, city and years of experience into the chunk metadata. In retrieve, read a city or a minimum of years from the question and pass a Chroma where= filter." | `list` rows |
 | 6 · Refusal | It always answers, even when no CV fits | "Make should_refuse return True when the best retrieved chunk is not relevant enough. Print the top score for every Verify question first, then pick a threshold and explain it." | Refusals correct |
-| 7 · Graph RAG | "Which candidates know X?" has more answers than K | "Fill in build_graph: for every CV add edges candidate → has_skill → skill and candidate → lives_in → city, as (type, name) nodes, with source=<file name> on each candidate node. Then make retrieve answer 'which / who … candidates' questions from the graph: one chunk for EVERY connected CV, with via = 'graph: <entity> → <name>'." Then open **🕸 Graph** | Recall@K on `list` rows · the "found by" column |
+| 7 · Graph RAG | "Which candidates know X?" has more answers than K | Three small parts, see **Step 7 in detail** below | Recall@K on `list` rows · the "found by" column · the 🕸 Graph tab |
 | 8 · MCP + agent | Use your bot from Claude or Kiro | "Write challenge/mcp_server.py with FastMCP exposing search_cvs(question) and get_cv(file name), using the functions in challenge/pipeline.py. Add it to .mcp.json as cv-chatbot." | ask your agent for a shortlist |
 
 Steps 1, 2 and 3 give the biggest wins: start there.
+
+## Step 7 in detail · Graph RAG
+
+Vector search finds *similar text*. A graph stores *facts as connections*, so "which candidates know
+Kubernetes?" becomes "every node connected to Kubernetes": all 9 people, no top-K limit.
+You need only **networkx** (already installed). The graph is rebuilt on every Reload.
+
+| Part | What it does | Prompt for Claude Code or Kiro |
+|------|--------------|--------------------------------|
+| **7a · Extract** | For each CV, find its entities: skills and the city it lists | "In challenge/pipeline.py, write extract(text) that returns the skills and the city found in one CV. Use a SKILLS list (about 80 tech words: python, kafka, kubernetes, power bi, n8n, fastapi…) and a CITIES list, matched as whole words. Look for the city only in the first 250 characters, so 'Tel Aviv University' does not count." |
+| **7b · Build** | Turn the facts into a graph | "Fill in build_graph(chunks): group the chunks by source, call extract on each CV, and add edges ('candidate', name) —has_skill— ('skill', x) and —lives_in— ('city', y). Give every candidate node source=<file name>. Keep the graph in a global GRAPH and return it." Then open the 🕸 Graph tab and pick *skill: kubernetes* |
+| **7c · Query** | Answer list questions from the graph | "Change retrieve: if the question asks 'which / who … candidates' and names a skill or city node of GRAPH, take every candidate connected to it (all of them, if it names two: the intersection), fetch each one's best chunk from Chroma with where={'source': ...}, and return them with via='graph: <entity> → <name>'. Otherwise use the normal search." |
+
+**Stretch (production style):** replace the word lists with one LLM call per CV:
+`llm("Return JSON: {skills: [], companies: [], city: ''}", cv_text)`. Save the result to a JSON
+file so Reload does not call the LLM 24 times again. Real systems do the same with
+Microsoft GraphRAG, LightRAG, LlamaIndex or LangChain's graph tools, and store the graph in Neo4j.
 
 ## The questions JSON (Verify)
 
