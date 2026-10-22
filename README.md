@@ -86,10 +86,10 @@ The offline stand-ins can't understand synonyms or write text, so some lessons l
 
 ## The challenge: build a CV chatbot
 
-[`challenge/`](challenge/) is the Build Day hands-on: a Gradio chatbot over candidate CVs that starts as naive RAG ([`challenge/app.py`](challenge/app.py)). Teams improve it step by step with Claude Code or Kiro, and prove every step in its **Verify** tab: upload a questions JSON, get Hit@K, Recall@K, MRR and refusals, and open any question to see its retrieval, the prompt sent and the output. Put the CVs in `challenge/cvs/` (ignored by git). The menu of steps and the prompts are in [`challenge/README.md`](challenge/README.md).
+[`challenge/`](challenge/) is the Build Day hands-on. Students get a Gradio app (Data, Chat, Verify and Graph tabs) and build the RAG pipeline behind it in one file, [`challenge/pipeline.py`](challenge/pipeline.py): level 1 ingestion, level 2 a Chroma vector DB, level 3 retrieval (= naive RAG), then features one at a time with Claude Code or Kiro. The **Verify** tab runs a questions JSON and reports Hit@K, Recall@K, MRR and refusals, with the retrieval, the prompt sent and the output for every question. Put the CVs in `challenge/cvs/` (ignored by git). Levels, prompts and the feature menu: [`challenge/README.md`](challenge/README.md).
 
 ```bash
-pip install pypdf python-docx gradio
+pip install pypdf python-docx chromadb gradio
 python challenge/app.py          # → http://127.0.0.1:7862
 ```
 
