@@ -239,7 +239,8 @@ with gr.Blocks(title="CV Chatbot") as demo:
             with gr.Column(scale=6):
                 query_out = gr.Markdown("Ask something to see how the answer is made.")
                 with gr.Tab("Retrieved"):
-                    hits_out = gr.Dataframe(headers=["#", "CV", "score", "chunk"], wrap=True, interactive=False)
+                    hits_out = gr.Dataframe(headers=["#", "CV", "score", "chunk"], wrap=True, interactive=False,
+                                             column_widths=["6%", "24%", "10%", "60%"])
                 with gr.Tab("Prompt sent"):
                     prompt_out = gr.Code(language=None, label="Exactly what the LLM receives")
                 with gr.Tab("Output"):
@@ -259,7 +260,8 @@ with gr.Blocks(title="CV Chatbot") as demo:
         gr.Markdown("### Open one question")
         pick = gr.Dropdown(label="Question", choices=[])
         d_head = gr.Markdown()
-        d_hits = gr.Dataframe(headers=["#", "CV", "score", "expected?", "chunk"], wrap=True, interactive=False)
+        d_hits = gr.Dataframe(headers=["#", "CV", "score", "expected?", "chunk"], wrap=True, interactive=False,
+                              column_widths=["5%", "20%", "8%", "12%", "55%"])
         with gr.Row():
             d_prompt = gr.Code(language=None, label="Prompt sent")
             d_answer = gr.Textbox(label="Output", lines=8)
