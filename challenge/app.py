@@ -227,6 +227,13 @@ def respond(question, chat, generate):
 
 
 # ================================================================= DATA (ingestion view)
+def spaced_letters(text):
+    """True when many lines come out of the PDF as single letters with spaces between them."""
+    lines = [l for l in text.splitlines() if len(l.split(" ")) > 6]
+    bad = [l for l in lines if sum(len(x) == 1 for x in l.split(" ")) / len(l.split(" ")) > 0.6]
+    return len(bad) >= 3
+
+
 def data_view():
     docs, chunks = STATE["docs"], STATE["chunks"]
     if not docs:
@@ -236,8 +243,10 @@ def data_view():
         per[c.get("source", "?")] = per.get(c.get("source", "?"), 0) + 1
     cv_rows = [[d["source"], len(d.get("text", "")), per.get(d["source"], 0), (d.get("text", "")[:120]).replace("\n", " ")] for d in docs]
     empty = [d["source"] for d in docs if len(d.get("text", "").strip()) < 200]
+    spaced = [d["source"] for d in docs if spaced_letters(d.get("text", ""))]
     md = (f"**{len(docs)} CVs · {len(chunks)} chunks · {np.mean([len(c.get('text', '')) for c in chunks]):.0f} characters per chunk on average**"
-          + (f"\n\n⚠️ Almost no text in: {', '.join(empty)} (scanned PDF? it needs OCR)" if empty else ""))
+          + (f"\n\n⚠️ Almost no text in: {', '.join(empty)} (text in a Word table? a scanned PDF? your reader missed it)" if empty else "")
+          + (f"\n\n⚠️ Letter-spaced text (\"P R O F I L E\") in: {', '.join(spaced)}: search cannot match these words" if spaced else ""))
     keys = sorted({k for c in chunks for k in c if k != "text"})
     ch_rows = [[str(c.get(k, "")) for k in keys] + [c.get("text", "")[:400]] for c in chunks[:60]]
     return md, cv_rows, gr.update(value=ch_rows, headers=keys + ["text"])
