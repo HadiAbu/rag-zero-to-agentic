@@ -7,8 +7,14 @@ what that one change did. The last two steps add Graph RAG and serve the result 
 for Claude or Kiro. The session ends with a team challenge on candidate CVs: chat, MCP and a
 **Knowledge Agent** in Claude Code or Kiro (brief: [`challenge/BRIEF.md`](challenge/BRIEF.md)).
 
+**Give students [`STUDENT_GUIDE.md`](STUDENT_GUIDE.md):** setup, team roles, the work loop and
+copy-paste prompts for Claude Code and Kiro for every step and challenge level.
+
 | File | What it is |
 |------|-----------|
+| `STUDENT_GUIDE.md` | The student handout: setup, team roles, the loop, prompt cards |
+| `check_setup.py` | Run at home before the session: checks packages, models, data and the AI assistant |
+| `../CLAUDE.md`, `../.kiro/steering/rag-lab.md` | Rules for the AI lab partner: explain first, small changes, run the scoreboard, no hardcoding |
 | `rag_lab.py` | The lab: STEP 1 on, STEPS 2–10 commented out, each with a *YOUR TURN* task |
 | `mcp_server.py` | STEP 11: serves the student's own pipeline as an MCP server |
 | `challenge.py` | Scores a pipeline on a question set (CV practice set by default) |
@@ -35,7 +41,8 @@ the LLM's answers too (about 25 s per question on a laptop CPU).
 git clone https://github.com/mkabajah/rag-zero-to-agentic.git && cd rag-zero-to-agentic
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt gradio
-python lab/rag_lab.py        # downloads the models once (about 3.2 GB) and prints a scoreboard
+python lab/check_setup.py    # downloads the models once (about 3.2 GB) and checks everything
+python lab/rag_lab.py        # prints the first scoreboard
 python app.py                # the chatbot opens at http://127.0.0.1:7860
 ```
 
