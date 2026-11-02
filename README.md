@@ -1,5 +1,11 @@
 # RAG: from Zero to Agentic
 
+> **About this fork.** This is a self-study project. I worked through the open course
+> [RAG: from Zero to Agentic](https://github.com/mkabajah/rag-zero-to-agentic) by Mohammad Kabajah,
+> and the course material below is his. My own work is the CV chatbot pipeline in
+> [`challenge/pipeline.py`](challenge/pipeline.py): ingestion, hybrid search with reranking,
+> metadata filters and Graph RAG, each step measured before the next.
+
 A hands-on course repository. **17 small, runnable lessons** take you from naive
 Retrieval-Augmented Generation (RAG) to a company-grade pipeline and an agent that
 uses retrieval as one tool among many.

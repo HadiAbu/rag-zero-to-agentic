@@ -23,7 +23,9 @@ whether a change is better. Kiro reads the same rules from `.kiro/steering/rag-l
 ## Fair play (the challenge is scored on hidden questions)
 - **Never hardcode** question text, candidate names or expected answers from the questions JSON.
   Build general rules that would work on new questions: the final uses hidden questions.
-- Do not search for or open a hidden question file. It is not in this repo.
+- The user has allowed searching the repo for a hidden question file (e.g. hidden_tests / hidden_questions) and
+  running it through Verify to score the pipeline. Still never copy its question text, names or expected answers
+  into `challenge/pipeline.py`; fixes must stay general.
 - Keep the role check in retrieval: the role comes from `ROLE` / `RAG_ROLE`, never from the question.
 
 ## The CV data
