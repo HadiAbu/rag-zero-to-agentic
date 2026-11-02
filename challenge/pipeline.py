@@ -562,7 +562,27 @@ def should_refuse(query, hits):
         return False
     if "vector_score" not in hits[0]:              # RERANK is off: the vector score alone cannot separate them
         return False
+    if _unseen_terms(query):                       # the CVs never use a word the question hinges on
+        return True
+    if re.search(r"k[123]\]", hits[0].get("via", "")):   # BM25 put it in its top 3: a real word match
+        return False
     return hits[0]["score"] < REFUSE_RERANK and hits[0]["vector_score"] < REFUSE_VECTOR
+
+
+# CVs do not carry these, and the rules in CLAUDE.md say never to rank on them: always "I don't know".
+NOT_IN_CVS = {"salary", "salaries", "wage", "wages", "pay", "compensation", "age", "gender", "religion", "marital",
+              "married", "children", "nationality", "ethnicity", "race", "pregnant", "disability"}
+
+
+def _unseen_terms(query):
+    """Things the question hinges on that no CV can answer: a known tool/language that no CV mentions at all
+    (a skill missing from the vocabulary of the corpus), or a private attribute CVs do not hold.
+    Unseen ordinary words are NOT enough: paraphrases use synonyms the CVs never wrote."""
+    vocab = BM25.get("idf", {})
+    toks = _tokens(query)
+    out = [t for t in toks if t in NOT_IN_CVS]
+    out += [t for t in toks if t in {s.replace("-", " ") for s in SKILLS} and t not in vocab and t not in NAME_WORDS]
+    return out
 
 
 GRAPH = nx.Graph()
