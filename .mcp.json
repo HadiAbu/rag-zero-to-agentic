@@ -2,7 +2,7 @@
   "mcpServers": {
     "rag-lab": {
       "type": "stdio",
-      "command": ".venv/bin/python",
+      "command": ".venv/Scripts/python.exe",
       "args": [
         "lab/mcp_server.py"
       ],
@@ -13,13 +13,23 @@
     },
     "cv-desk": {
       "type": "stdio",
-      "command": ".venv/bin/python",
+      "command": ".venv/Scripts/python.exe",
       "args": [
         "lab/mcp_server.py"
       ],
       "env": {
         "RAG_ROLE": "employee",
         "RAG_CORPUS": "cvs"
+      }
+    },
+    "cv-chatbot": {
+      "type": "stdio",
+      "command": ".venv/Scripts/python.exe",
+      "args": [
+        "challenge/mcp_server.py"
+      ],
+      "env": {
+        "RAG_ROLE": "employee"
       }
     }
   }

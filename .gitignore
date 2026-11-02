@@ -15,3 +15,8 @@ lab/challenge/hidden*.jsonl
 challenge/cvs/
 challenge/verify_results.json
 challenge/chroma_db/
+
+# real CVs, hidden questions and browser captures of the app: never commit
+challenge/CVs/
+challenge/golden/
+.playwright-mcp/
